@@ -55,6 +55,22 @@ class rpg
         }
     }
 
+    public static function controller($dir, $script)
+    {
+        if (is_dir(settings::$root.'/app/controllers/'.$dir))
+        {
+            if (is_file(settings::$root.'/app/controllers/'.$dir.'/'.$script.'.php'))
+            {
+                require settings::$root.'/app/controllers/'.$dir.'/'.$script.'.php';
+                call_user_func([new $script, "main"]);
+            }
+            else
+            {
+                route::not_found();
+            }
+        }
+    }
+
     public static function redirect($url, $wait = 0)
     {
         if ($wait != 0)
