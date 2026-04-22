@@ -10,7 +10,7 @@ class rpg
             extract($data);
             require settings::$root.'/app/views/'.$name.'.php';
         }
-        else if (is_file(settings::$root."/app/views/".$name.".html") && is_array($data) || is_object($data))
+        else if (is_file(settings::$root."/app/views/".$name.".html") && (is_array($data) || is_object($data)))
         {
             $file = file_get_contents(settings::$root."/app/views/".$name.".html");
 
@@ -108,7 +108,7 @@ class rpg
     {
         if ($name != null)
         {
-            return $_GET[$name];
+            return (array_key_exists($name, $_GET) ? $_GET[$name] : null);
         }
         else
         {
@@ -120,7 +120,7 @@ class rpg
     {
         if ($name != null)
         {
-            return $_POST[$name];
+            return (array_key_exists($name, $_POST) ? $_POST[$name] : null);
         }
         else
         {
@@ -132,7 +132,7 @@ class rpg
     {
         if ($name != null)
         {
-            return $_FILES[$name];
+            return (array_key_exists($name, $_FILES) ? $_FILES[$name] : null);
         }
         else
         {
@@ -144,7 +144,7 @@ class rpg
     {
         if ($name != null)
         {
-            return $_COOKIE[$name];
+            return (array_key_exists($name, $_COOKIE) ? $_COOKIE[$name] : null);
         }
         else
         {

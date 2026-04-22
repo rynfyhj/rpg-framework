@@ -9,11 +9,9 @@ try
     $route->app();
     $output = ob_get_clean();
     echo $output;
-} 
+}
 catch (Throwable $e)
 {
     ob_end_clean();
     $log->error_response($e);
 }
-
-ob_end_flush();

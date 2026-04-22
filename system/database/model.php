@@ -7,6 +7,8 @@ abstract class model
 
     protected $where;
 
+    protected $where_params = array();
+
     protected $limit;
 
     protected $order_by;
@@ -27,7 +29,8 @@ abstract class model
 
     public function where($name, $operator, $value)
     {
-        $this->where = $name." ".$operator." "."'".$value."'";
+        $this->where = $name." ".$operator." :where_value";
+        $this->where_params = [":where_value" => $value];
 
         return $this;
     }
@@ -87,10 +90,20 @@ abstract class model
             $sql .= " LIMIT ".$this->limit;
         }
 
-        $query = $this->db->query($sql);
+        if ($this->where != null)
+        {
+            $query = $this->db->prepare($sql);
+            $this->db->auto_bind($query, ["where_value" => $this->where_params[":where_value"]]);
+            $this->db->execute($query);
+        }
+        else
+        {
+            $query = $this->db->query($sql);
+        }
 
-        $this->where    = null;
-        $this->limit    = null;
+        $this->where = null;
+        $this->where_params = array();
+        $this->limit = null;
         $this->order_by = null;
 
         if ($this->all == 0)
@@ -117,33 +130,49 @@ abstract class model
     public function insert($table, $data = array())
     {
         $keys = array_keys($data);
-        $vals = array_values($data);
+        $params = array();
 
-        $bind = array();
-
-        foreach ($vals as $val)
+        foreach ($keys as $key)
         {
-            array_push($bind, "'".$val."'");
+            $params[] = ":".$key;
         }
 
-        $sql = "INSERT INTO $table (".implode(",", $keys).") VALUES (".implode(",", $bind).")";
+        $sql = "INSERT INTO $table (".implode(",", $keys).") VALUES (".implode(",", $params).")";
 
-        return $this->db->query($sql);
+        $query = $this->db->prepare($sql);
+        $this->db->auto_bind($query, $data);
+
+        return $this->db->execute($query);
     }
 
     public function update($table, $data, $where)
     {
-        $sql  = "UPDATE $table SET ".key($data)." = "."'".current($data)."'";
-        $sql .= " WHERE ".key($where)." = "."'".current($where)."'";
+        $data_key = key($data);
+        $data_val = current($data);
+        $where_key = key($where);
+        $where_val = current($where);
 
-        return $this->db->query($sql);
+        $sql  = "UPDATE $table SET $data_key = :data_value";
+        $sql .= " WHERE $where_key = :where_value";
+
+        $query = $this->db->prepare($sql);
+        $this->db->bind($query, ":data_value", $data_val);
+        $this->db->bind($query, ":where_value", $where_val);
+
+        return $this->db->execute($query);
     }
 
     public function delete($table, $where)
     {
-        $sql = "DELETE FROM $table WHERE ".key($where)." = "."'".current($where)."'";
+        $where_key = key($where);
+        $where_val = current($where);
 
-        return $this->db->query($sql);
+        $sql = "DELETE FROM $table WHERE $where_key = :where_value";
+
+        $query = $this->db->prepare($sql);
+        $this->db->bind($query, ":where_value", $where_val);
+
+        return $this->db->execute($query);
     }
 
     public function fetchColumn($table, $where = null)
@@ -152,7 +181,16 @@ abstract class model
 
         if ($where != null)
         {
-            $sql .= " WHERE ".key($where)." = "."'".current($where)."'";
+            $where_key = key($where);
+            $where_val = current($where);
+
+            $sql .= " WHERE $where_key = :where_value";
+
+            $query = $this->db->prepare($sql);
+            $this->db->bind($query, ":where_value", $where_val);
+            $this->db->execute($query);
+
+            return $this->db->fetchColumn($query);
         }
 
         $query = $this->db->query($sql);

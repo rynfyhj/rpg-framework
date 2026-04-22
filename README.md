@@ -2,105 +2,156 @@
 
 A lightweight and high-performance PHP framework designed for simplicity and flexibility.
 
-## Default Index
+## What's New
 
-![Default Index](public/assets/img/rpg-default-index.gif)
+- Composer project support (`composer.json`)
+- Composer autoload integration in bootstrap (`system/boot.php`)
+- Development server command: `composer serve`
+- Query and model safety improvements with prepared statements in core model methods
+- Routing/query parsing reliability fixes
+- Safer request helper accessors (`get/post/file/cookie`) for missing keys
+- Log reader resilience when log files do not exist yet
+- Session cleanup optimization
 
-## System Settings
+## Requirements
 
-System settings can be configured in the `settings.php` file. The main sections include:
+- PHP 7.4+
+- Composer 2+
 
-   * Constants → Defines timezone, language, and debugging settings.
+## Quick Start (Composer)
 
-   * Defaults → Default settings for your project.
-
-## App Config
-
-The application configuration file is located at `app/root/config.php`. It is used to define the database connection details and the defaults you will use in your application, such as email SMTP settings, etc.
-
-   * Database → Database connection details.
-
-## Root Directory
-
-Your project's root directory is `public`. The `index.php` inside this directory handles all routing. You can place your static assets such as CSS, JS, webfonts, images, `robots.txt`, and `sitemap.xml` in this directory.
-
-## Installation
-
-To get started with RPG Framework, clone the repository and upload it to your web server's root directory.
-
-## Apache Configuration
-
-RPG Framework includes an `.htaccess` file for Apache configuration in the `public` directory.
-
-## Nginx Configuration
-
-If you're using Nginx, you can use the following configuration to serve RPG Framework.
-
-```
-    server {
-        listen 80;
-
-        server_name localhost;
-        root /var/www/html/rpg-framework/public;
-     
-        add_header X-Frame-Options "SAMEORIGIN";
-        add_header X-Content-Type-Options "nosniff";
-     
-        index index.php;
-     
-        charset utf-8;
-     
-        location / {
-            try_files $uri $uri/ /index.php?$query_string;
-        }
-     
-        location = /favicon.ico { access_log off; log_not_found off; }
-        location = /robots.txt  { access_log off; log_not_found off; }
-     
-        error_page 404 /index.php;
-     
-        location ~ ^/index\.php(/|$) {
-            fastcgi_hide_header X-Powered-By;
-
-            include fastcgi_params;
-            fastcgi_pass unix:/run/php-fpm/www.sock;
-
-            fastcgi_index index.php;
-            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-        }
-     
-        location ~ /\.(?!well-known).* {
-            deny all;
-        }
-    }
+```bash
+composer install
+composer dump-autoload
+composer serve
 ```
 
-## Route Definition
+Open:
 
-In RPG Framework, routes are defined by creating PHP classes in the `app/controllers` directory. The file and class names should be in lowercase. The `main` method within the controller is automatically executed when the corresponding URL is accessed.
+- `http://127.0.0.1:8000`
 
-For the route `example.com/contact`, create the file: `app/controllers/contact.php`
+## Project Structure
 
-Content of the file:
+- `public/` → web root and entrypoint (`public/index.php`)
+- `app/controllers/` → route controllers
+- `app/models/` → application models
+- `app/views/` → view files
+- `app/root/config.php` → app configuration
+- `system/` → framework core
 
-```
+## Configuration
+
+Application configuration file:
+
+- `app/root/config.php`
+
+Set your database connection details there:
+
+- driver
+- host
+- user
+- password
+- db name
+
+## Routing
+
+Routes are mapped by controller filename/classname in `app/controllers`.
+
+For example, URL:
+
+- `/contact`
+
+maps to:
+
+- `app/controllers/contact.php`
+
+Example:
+
+```php
 <?php
 
-    class contact extends controller
+class contact extends controller
+{
+    public function main()
     {
-        public function main()
-        {
-            echo "Hello World!";
-        }
+        echo "Hello World!";
     }
+}
 ```
 
-The controller class inherits from `app/base/controller.php`, which serves as a base controller. This allows you to avoid repeating commonly used methods across your pages.
+## Development Server
+
+Run local development server:
+
+```bash
+composer serve
+```
+
+Equivalent command:
+
+```bash
+php -S 127.0.0.1:8000 -t public
+```
+
+## Web Server Setup
+
+### Apache
+
+An `.htaccess` file is included in `public/`.
+
+### Nginx
+
+```nginx
+server {
+    listen 80;
+    server_name localhost;
+    root /var/www/html/rpg/public;
+
+    add_header X-Frame-Options "SAMEORIGIN";
+    add_header X-Content-Type-Options "nosniff";
+
+    index index.php;
+    charset utf-8;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location = /favicon.ico { access_log off; log_not_found off; }
+    location = /robots.txt  { access_log off; log_not_found off; }
+
+    error_page 404 /index.php;
+
+    location ~ ^/index\.php(/|$) {
+        fastcgi_hide_header X-Powered-By;
+        include fastcgi_params;
+        fastcgi_pass unix:/run/php-fpm/www.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+}
+```
 
 ## Defaults
 
-Default settings are located in `system/settings.php`. You can modify these values to suit your needs. Two key variables are:
+Default system settings are in `system/settings.php`.
 
-   * `$index`: The page that receives incoming requests to your website. If you want your homepage to be accessed via `example.com` or `example.com/index`, you don’t need to change the default value. However, you’ll need to create `app/controllers/index.php`.
+- `$index`: default controller for `/`
+- `$not_found`: fallback controller for unknown routes
 
-   * `$not_found`: The page to be displayed when a route is not found. By default, this points to `not_found`. You can customize it by creating `app/controllers/not_found.php`.
+## Logs
+
+Framework logs are stored under:
+
+- `system/logs/access/`
+- `system/logs/error/`
+
+Composer install/update scripts ensure these directories exist.
+
+## License
+
+MIT

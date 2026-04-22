@@ -13,7 +13,7 @@ class log
             "Stack Trace" => explode("\n", $e->getTraceAsString())
         ];
 
-        $json = json_encode($error);
+        $json = json_encode($error, JSON_INVALID_UTF8_IGNORE);
 
         header("Content-Type: application/json");
         http_response_code(500);
@@ -55,10 +55,21 @@ class log
 
     public static function access_logs($line = 10, $return = 0)
     {
-        $log = file_get_contents
-        (
-            settings::$root."/system/logs/access/".settings::$date.".json"
-        );
+        $log_path = settings::$root."/system/logs/access/".settings::$date.".json";
+
+        if (!is_file($log_path))
+        {
+            if ($return == 1)
+            {
+                return new stdClass;
+            }
+
+            header("Content-Type: application/json");
+            echo "[]";
+            return;
+        }
+
+        $log = file_get_contents($log_path);
 
         $parse = array_reverse(explode("\n", $log));
         $build = implode(",", array_slice($parse, 1, $line));
@@ -78,10 +89,21 @@ class log
 
     public static function error_logs($line = 10, $return = 0)
     {
-        $log = file_get_contents
-        (
-            settings::$root."/system/logs/error/".settings::$date.".json"
-        );
+        $log_path = settings::$root."/system/logs/error/".settings::$date.".json";
+
+        if (!is_file($log_path))
+        {
+            if ($return == 1)
+            {
+                return new stdClass;
+            }
+
+            header("Content-Type: application/json");
+            echo "[]";
+            return;
+        }
+
+        $log = file_get_contents($log_path);
 
         $parse = array_reverse(explode("\n", $log));
         $build = implode(",", array_slice($parse, 1, $line));

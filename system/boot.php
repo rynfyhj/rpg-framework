@@ -1,6 +1,10 @@
 <?php
 
-// System
+if (is_file(__DIR__."/../vendor/autoload.php"))
+{
+    require __DIR__."/../vendor/autoload.php";
+}
+
 require __DIR__."/settings.php";
 require __DIR__."/security.php";
 require __DIR__."/route.php";

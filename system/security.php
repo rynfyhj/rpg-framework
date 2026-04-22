@@ -10,40 +10,40 @@ class security
 
     public static function xss_detection($data)
     {
-        $xss = stripos(" ".$data, "<script");
+        $xss = stripos($data, "<script");
 
-        if ($xss == true)
+        if ($xss !== false)
         {
             return 1;
         }
         else
         {
-            return $data;
+            return 0;
         }
     }
 
     public static function shell_detection($data)
     {
-        $php = stripos(" ".$data, "<?php");
+        $php = stripos($data, "<?php");
 
-        if ($php == true)
+        if ($php !== false)
         {
             return 1;
         }
         else
         {
-            return $data;
+            return 0;
         }
     }
 
     public static function create_password($password)
     {
-        return bin2hex(password_hash($password, PASSWORD_BCRYPT));
+        return password_hash($password, PASSWORD_BCRYPT);
     }
 
     public static function verify_password($password, $hash)
     {
-        return (password_verify($password, hex2bin($hash)) ? 1 : 0);
+        return (password_verify($password, $hash) ? 1 : 0);
     }
 
     public static function fix_username($username)

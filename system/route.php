@@ -14,7 +14,7 @@ class route
 
         $get = stripos(settings::$uri, "?");
 
-        if ($get == true)
+        if ($get !== false)
         {
             $params = explode("?", settings::$uri);
             $param = explode("&", security::xss_protection($params[1]));
@@ -23,7 +23,7 @@ class route
 
             $url = explode("/", $params[0]);
 
-            if (is_file(settings::$root."/app/controllers/".$url[1].".php"))
+            if (!empty($url[1]) && is_file(settings::$root."/app/controllers/".$url[1].".php"))
             {
                 require settings::$root."/app/controllers/".$url[1].".php";
                 call_user_func([new $url[1], "main"]);
@@ -49,7 +49,7 @@ class route
         {
             $url = explode("/", settings::$uri);
 
-            if (is_file(settings::$root."/app/controllers/".$url[1].".php"))
+            if (!empty($url[1]) && is_file(settings::$root."/app/controllers/".$url[1].".php"))
             {
                 require settings::$root."/app/controllers/".$url[1].".php";
                 call_user_func([new $url[1], "main"]);
@@ -76,14 +76,18 @@ class route
 
     public static function set($param = array())
     {
-        unset($_GET);
+        $_GET = array();
     
         if (count($param) > 0)
         {
             foreach ($param as $value)
             {
-                $x = explode("=", $value);
-                $_GET[$x[0]] = $x[1];
+                $x = explode("=", $value, 2);
+
+                if (count($x) === 2 && $x[0] !== "")
+                {
+                    $_GET[urldecode($x[0])] = urldecode($x[1]);
+                }
             }
         }
     }

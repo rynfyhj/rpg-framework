@@ -66,14 +66,14 @@ class settings
         self::$root = str_replace("/public", "", $_SERVER["DOCUMENT_ROOT"]);
 
         self::$method   = $_SERVER["REQUEST_METHOD"];
-        self::$script   = $_SERVER["SCRIPT_NAME"];
-        self::$scheme   = $_SERVER["REQUEST_SCHEME"];
-        self::$status   = $_SERVER["REDIRECT_STATUS"];
+        self::$script   = (isset($_SERVER["SCRIPT_NAME"]) ? $_SERVER["SCRIPT_NAME"] : "");
+        self::$scheme   = (isset($_SERVER["REQUEST_SCHEME"]) ? $_SERVER["REQUEST_SCHEME"] : ((isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] !== "off") ? "https" : "http"));
+        self::$status   = (isset($_SERVER["REDIRECT_STATUS"]) ? $_SERVER["REDIRECT_STATUS"] : "200");
         self::$protocol = $_SERVER["SERVER_PROTOCOL"];
         self::$host     = $_SERVER["HTTP_HOST"];
         self::$uri      = urldecode($_SERVER["REQUEST_URI"]);
         self::$ip       = $_SERVER["REMOTE_ADDR"];
-        self::$ua       = $_SERVER["HTTP_USER_AGENT"];
+        self::$ua       = (isset($_SERVER["HTTP_USER_AGENT"]) ? $_SERVER["HTTP_USER_AGENT"] : "");
 
         if (isset($_SERVER["HTTP_COOKIE"]))
         {

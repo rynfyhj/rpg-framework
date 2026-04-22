@@ -37,7 +37,14 @@ class session extends model
         $this->db->bind($query, ":session", $id);
         $this->db->execute($query);
 
-        return $this->db->fetch($query)->$column;
+        $row = $this->db->fetch($query);
+
+        if (!$row || !isset($row->$column))
+        {
+            return 0;
+        }
+
+        return $row->$column;
     }
 
     public function read($id)
@@ -112,14 +119,8 @@ class session extends model
 
     public function clean()
     {
-        $query = $this->db->prepare("SELECT * FROM sessions");
-        $this->db->execute($query);
-      
-        while ($data = $this->db->fetch($query))
-        {
-            $result = $this->db->prepare("DELETE FROM sessions WHERE timestamp < (NOW() - INTERVAL 15 MINUTE)");
-            $this->db->execute($result);
-        }
+        $result = $this->db->prepare("DELETE FROM sessions WHERE timestamp < (NOW() - INTERVAL 15 MINUTE)");
+        $this->db->execute($result);
     }
 
     public function close()

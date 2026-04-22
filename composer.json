@@ -1,0 +1,31 @@
+{
+    "name": "rpg/framework",
+    "description": "Lightweight and high-performance PHP framework",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "classmap": [
+            "app/",
+            "system/"
+        ],
+        "exclude-from-classmap": [
+            "system/database/tables/"
+        ]
+    },
+    "scripts": {
+        "serve": "@php -S 127.0.0.1:8000 -t public",
+        "post-install-cmd": [
+            "@php -r \"is_dir('system/logs/access') || mkdir('system/logs/access', 0775, true);\"",
+            "@php -r \"is_dir('system/logs/error') || mkdir('system/logs/error', 0775, true);\""
+        ],
+        "post-update-cmd": [
+            "@post-install-cmd"
+        ]
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
